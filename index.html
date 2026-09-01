@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MEN SHOP  - نظام كاشير</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { -webkit-tap-highlight-color: transparent; }
+html,body { background:#000000; overscroll-behavior: none; }
+body { font-family:'Cairo',sans-serif; }
+.glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border:1px solid rgba(212,175,55,0.15); }
+.glass-strong { background: rgba(0,0,0,0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border:1px solid rgba(212,175,55,0.2); }
+.gold-text { background:linear-gradient(90deg,#D4AF37 0%,#F9E076 30%,#D4AF37 60%,#FFF3B0 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.glow-blue { filter:drop-shadow(0 0 16px rgba(0,212,255,0.7)); }
+.glow-gold { box-shadow:0 0 40px rgba(212,175,55,0.15), 0 0 80px rgba(212,175,55,0.05), inset 0 1px 0 rgba(255,255,255,0.05); }
+.btn-gold { background:linear-gradient(135deg,#D4AF37 0%,#B8941F 100%); box-shadow:0 4px 20px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,255,255,0.2); }
+.btn-gold:active { transform:scale(0.98); }
+.transition-200 { transition:all 200ms cubic-bezier(0.4,0,0.2,1); }
+.card-hover:hover { transform:translateY(-2px); border-color:rgba(212,175,55,0.3); }
+.blue-glow { box-shadow:0 0 30px rgba(0,212,255,0.15); }
+.input-glass { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); transition:all 200ms; }
+.input-glass:focus { background:rgba(255,255,255,0.06); border-color:rgba(212,175,55,0.5); outline:none; box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+.no-scrollbar::-webkit-scrollbar { display:none; }
+.no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+.toast-in { animation:toastIn 0.3s cubic-bezier(0.4,0,0.2,1); }
+@keyframes toastIn { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.particle { position:absolute; border-radius:50%; pointer-events:none; }
+.shimmer { position:relative; overflow:hidden; }
+.shimmer:after { content:''; position:absolute; top:0; right:-150%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent); transform:skewX(-20deg); animation:shimmer 3s infinite; }
+@keyframes shimmer { 0% { right:-150%; } 100% { right:200%; } }
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:#000; }
+::-webkit-scrollbar-thumb { background:rgba(212,175,55,0.3); border-radius:3px; }
+</style>
+</head>
+<body class="bg-black text-white selection:bg-[#D4AF37]/30">
+<!-- LOGIN -->
+<div id="loginScreen" class="fixed inset-0 z-[100] flex items-center justify-center">
+  <canvas id="particles" class="absolute inset-0"></canvas>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.08),transparent_60%),radial-gradient(ellipse_at_bottom,_rgba(0,212,255,0.08),transparent_60%)]"></div>
+  <div class="relative z-10 w-full max-w-[420px] mx-4">
+    <div class="glass rounded-[32px] p-8 sm:p-10 glow-gold shimmer">
+      <div class="flex justify-center gap-5 mb-7">
+        <div class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-2xl glow-blue">🛒</div>
+        <div class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-2xl" style="filter:drop-shadow(0 0 16px rgba(212,175,55,0.7))">📦</div>
+        <div class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-2xl glow-blue">💳</div>
+      </div>
+      <h1 class="text-[36px] font-black text-center gold-text leading-none tracking-wider">MEN SHOp</h1>
+      <p class="text-center text-white/60 mt-3 mb-8 text-[15px] font-medium">نظام كاشير </p>
+      
+      <div class="flex gap-1.5 p-1 glass rounded-2xl mb-6">
+        <button id="roleOwner" class="role-btn flex-1 py-2.5 rounded-xl text-sm font-bold transition-200 bg-white/10 text-[#D4AF37]">صاحب محل</button>
+        <button id="roleCashier" class="role-btn flex-1 py-2.5 rounded-xl text-sm font-bold transition-200 text-white/60 hover:text-white">كاشير</button>
+      </div>
+
+      <div class="space-y-3.5">
+        <input id="shopName" placeholder="اسم المحل" class="w-full h-12 px-4 rounded-2xl input-glass text-[15px]" value="متجر المدينة">
+        <select id="activity" class="w-full h-12 px-4 rounded-2xl input-glass text-[15px] appearance-none">
+          <option>ملابس</option><option>سوبر ماركت</option><option>موبايلات</option><option>أخرى</option>
+        </select>
+        <input id="email" type="email" placeholder="البريد الإلكتروني" class="w-full h-12 px-4 rounded-2xl input-glass text-[15px] text-left" dir="ltr" value="demo@menshop.eg">
+        <input id="phone" placeholder="رقم الموبايل" class="w-full h-12 px-4 rounded-2xl input-glass text-[15px] text-left" dir="ltr" value="01001234567">
+      </div>
+
+      <button id="loginBtn" class="w-full h-[52px] mt-7 rounded-2xl btn-gold font-bold text-[16px] text-black transition-200 active:scale-[0.98] flex items-center justify-center gap-2">
+       دخول <span class="text-xl">🚀</span>
+      </button>
+      <p class="text-center text-[12px] text-white/40 mt-4 leading-relaxed">نفس الإيميل = نفس البيانات على الموبايل</p>
+    </div>
+    <p class="text-center text-[11px] text-white/30 mt-6"></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden min-h-screen">
+  <!-- TOP BAR -->
+  <header class="fixed top-0 inset-x-0 z-40 h-[64px] glass-strong border-b border-white/5">
+    <div class="h-full px-3 sm:px-5 flex items-center gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#B8941F] flex items-center justify-center font-black text-black">M</div>
+        <div class="min-w-0">
+          <div id="topShopName" class="font-bold text-[15px] leading-tight truncate">لانا ماركت</div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="syncStatus" class="text-[11px] text-emerald-400"></span>
+            <span class="text-[10px] text-white/40">•</span>
+            <span id="topActivity" class="text-[11px] text-white/50">سوبر ماركت</span>
+          </div>
+        </div>
+      <div class="flex-1"></div>
+      <button id="sampleBtn" class="hidden sm:flex h-8 px-3 rounded-xl glass text-[12px] hover:bg-white/10 transition-200 items-center gap-1.5">
+        <span>⚡</span> بيانات تجريبية
+      </button>
+      <button class="w-9 h-9 rounded-xl glass flex items-center justify-center relative hover:bg-white/10 transition-200">
+        <span class="text-[18px]">🔔</span>
+        <span class="absolute top-1 right-1 w-2 h-2 bg-[#00D4FF] rounded-full animate-pulse"></span>
+      </button>
+      <div class="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-[#D4AF37]/30">
+        <img src="https://i.pravatar.cc/100?img=12" class="w-full h-full object-cover">
+      </div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="hidden md:block fixed right-0 top-[64px] bottom-0 w-[240px] p-3 overflow-y-auto no-scrollbar">
+    <nav id="sidebar" class="space-y-1.5">
+      <!-- nav items injected -->
+    </nav>
+    <div class="mt-6 p-3 rounded-2xl glass">
+      <div class="text-[11px] text-white/50 mb-2">المساحة السحابية</div>
+      <div class="h-1.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full w-[34%] bg-gradient-to-r from-[#00D4FF] to-[#D4AF37] rounded-full"></div></div>
+      <div class="text-[10px] text-white/40 mt-1.5">34% مستخدم • PRO</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="pt-[64px] md:pr-[240px] pb-[84px] md:pb-6">
+    <div class="max-w-[1400px] mx-auto p-3 sm:p-5">
+
+      <!-- DASHBOARD -->
+      <section data-page="dashboard" class="page">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-[22px] font-black">لوحة التحكم 📊</h2>
+          <div class="text-[12px] text-white/50" id="todayDate"></div>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <div class="glass rounded-[24px] p-4 card-hover transition-200">
+            <div class="flex items-start justify-between">
+              <div><p class="text-[12px] text-white/50">مبيعات اليوم</p><p class="text-[26px] font-black mt-1"><span id="kpiSales">0</span><span class="text-[14px] font-medium mr-1">ج.م</span></p></div>
+              <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl">💰</div>
+            </div>
+            <div class="mt-3 flex items-center gap-1 text-[11px] text-emerald-400"><span>▲</span><span id="salesChange">0%</span></div>
+          </div>
+          <div class="glass rounded-[24px] p-4 card-hover transition-200">
+            <div class="flex items-start justify-between">
+              <div><p class="text-[12px] text-white/50">عدد الفواتير</p><p class="text-[26px] font-black mt-1" id="kpiInvoices">0</p></div>
+              <div class="w-10 h-10 rounded-2xl bg-[#00D4FF]/10 flex items-center justify-center text-xl">🧾</div>
+            </div>
+            <div class="mt-3 text-[11px] text-white/40">اليوم</div>
+          </div>
+          <div class="glass rounded-[24px] p-4 card-hover transition-200">
+            <div class="flex items-start justify-between">
+              <div><p class="text-[12px] text-white/50">منتجات ناقصة</p><p class="text-[26px] font-black mt-1 text-[#D4AF37]" id="kpiLow">0</p></div>
+              <div class="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-xl">⚠️</div>
+            </div>
+            <div class="mt-3 text-[11px] text-[#D4AF37]">يحتاج طلب</div>
+          </div>
+          <div class="glass rounded-[24px] p-4 card-hover transition-200">
+            <div class="flex items-start justify-between">
+              <div><p class="text-[12px] text-white/50">صافي ربح</p><p class="text-[26px] font-black mt-1"><span id="kpiProfit">0</span><span class="text-[14px] font-medium mr-1">ج.م</span></p></div>
+              <div class="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center text-xl">📈</div>
+            </div>
+            <div class="mt-3 text-[11px] text-white/40">بعد التكلفة</div>
+          </div>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-3">
+          <div class="lg:col-span-2 glass rounded-[24px] p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="font-bold">المبيعات - آخر 7 أيام</h3><span class="text-[11px] px-2 py-1 rounded-lg bg-[#00D4FF]/10 text-[#00D4FF]">مباشر</span></div>
+            <div class="h-[220px]"><canvas id="salesChart"></canvas></div>
+          </div>
+          <div class="glass rounded-[24px] p-4">
+            <h3 class="font-bold mb-3">أفضل 5 منتجات</h3>
+            <div id="topProducts" class="space-y-2.5"></div>
+          </div>
+          <div class="lg:col-span-3 glass rounded-[24px] p-4">
+            <h3 class="font-bold mb-3 flex items-center gap-2">تنبيهات المخزون <span class="text-[11px] px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">AI</span></h3>
+            <div id="lowStockList" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- POS -->
+      <section data-page="pos" class="page hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-[22px] font-black">نقطة البيع 🧾</h2>
+          <div class="flex gap-2">
+            <button id="barcodeBtn" class="h-9 px-3 rounded-xl glass text-[13px] hover:bg-white/10 transition-200 flex items-center gap-1.5"><span>📷</span> سكانر</button>
+            <select id="posCustomer" class="h-9 px-3 rounded-xl glass text-[13px] bg-black"></select>
+          </div>
+        </div>
+        <div class="grid lg:grid-cols-[1fr_380px] gap-3 items-start">
+          <div class="glass rounded-[24px] p-3 sm:p-4">
+            <div class="flex gap-2 mb-3">
+              <div class="flex-1 relative"><input id="posSearch" placeholder="ابحث بالاسم أو الباركود..." class="w-full h-11 pr-10 pl-3 rounded-xl input-glass text-[14px]"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-white/40">🔍</span></div>
+              <select id="posCategory" class="h-11 px-3 rounded-xl input-glass text-[13px] bg-black min-w-[110px]"></select>
+            </div>
+            <div id="posProducts" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 max-h-[520px] overflow-y-auto pr-1 -mr-1"></div>
+          </div>
+          <div class="glass rounded-[24px] p-4 sticky top-[76px]">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold">السلة</h3>
+              <button id="clearCart" class="text-[12px] text-white/50 hover:text-white">تفريغ</button>
+            </div>
+            <div id="cartItems" class="space-y-2 max-h-[280px] overflow-y-auto -mr-2 pl-2 mb-3 min-h-[120px]"></div>
+            <div class="space-y-2 py-3 border-y border-white/5 text-[14px]">
+              <div class="flex justify-between text-white/70"><span>المجموع</span><span id="cartSubtotal">0 ج.م</span></div>
+              <div class="flex justify-between text-white/70"><span>الضريبة (14%)</span><span id="cartTax">0 ج.م</span></div>
+              <div class="flex justify-between font-bold text-[18px]"><span>الإجمالي</span><span class="gold-text" id="cartTotal">0 ج.م</span></div>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 my-3">
+              <button data-pay="cash" class="pay-btn h-11 rounded-xl glass border-2 border-[#D4AF37] text-[13px] font-bold">كاش</button>
+              <button data-pay="visa" class="pay-btn h-11 rounded-xl glass text-[13px]">فيزا</button>
+              <button data-pay="vodafone" class="pay-btn h-11 rounded-xl glass text-[13px]">فودافون</button>
+              <button data-pay="instapay" class="pay-btn h-11 rounded-xl glass text-[13px]">إنستاباي</button>
+            </div>
+            <button id="checkoutBtn" class="w-full h-[52px] rounded-2xl btn-gold text-black font-black text-[17px] transition-200 active:scale-[0.98]">دفع وإصدار فاتورة</button>
+            <p class="text-[11px] text-center text-white/40 mt-2">نقاط العميل: <span id="customerPoints" class="text-[#D4AF37]">0</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- INVENTORY -->
+      <section data-page="inventory" class="page hidden">
+        <div class="flex flex-wrap gap-2 items-center justify-between mb-4">
+          <h2 class="text-[22px] font-black">المخزن 📦</h2>
+          <div class="flex gap-2">
+            <button id="lowFilter" class="h-9 px-3 rounded-xl glass text-[13px]">نواقص فقط</button>
+            <button id="importBtn" class="h-9 px-3 rounded-xl glass text-[13px]">استيراد</button>
+            <button id="addProductBtn" class="h-9 px-4 rounded-xl btn-gold text-black font-bold text-[13px]">+ منتج</button>
+          </div>
+        </div>
+        <div class="glass rounded-[24px] overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-[13px]">
+              <thead class="bg-white/[0.02] border-b border-white/5"><tr class="text-white/50">
+                <th class="text-right p-3 font-medium">المنتج</th><th class="text-right p-3 font-medium">باركود</th><th class="text-right p-3 font-medium">الكمية</th><th class="text-right p-3 font-medium">شراء</th><th class="text-right p-3 font-medium">بيع</th><th class="text-right p-3 font-medium">ربح</th><th class="text-right p-3 font-medium">AI</th><th class="text-right p-3"></th>
+              </tr></thead>
+              <tbody id="inventoryTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUSTOMERS -->
+      <section data-page="customers" class="page hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-[22px] font-black">العملاء 👥</h2>
+          <button id="addCustomerBtn" class="h-9 px-4 rounded-xl btn-gold text-black font-bold text-[13px]">+ عميل</button>
+        </div>
+        <div id="customersGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </section>
+
+      <!-- INVOICES -->
+      <section data-page="invoices" class="page hidden">
+        <div class="flex flex-wrap gap-2 items-center justify-between mb-4">
+          <h2 class="text-[22px] font-black">الفواتير 📄</h2>
+          <div class="flex gap-2"><input id="invoiceSearch" placeholder="بحث..." class="h-9 w-[160px] px-3 rounded-xl input-glass text-[13px]"><select id="invoiceFilter" class="h-9 px-2 rounded-xl input-glass text-[13px] bg-black"><option value="">الكل</option><option>كاش</option><option>فيزا</option></select></div>
+        </div>
+        <div class="glass rounded-[24px] overflow-hidden">
+          <div class="overflow-x-auto"><table class="w-full text-[13px]"><thead class="bg-white/[0.02] border-b border-white/5"><tr class="text-white/50"><th class="text-right p-3">رقم</th><th class="text-right p-3">التاريخ</th><th class="text-right p-3">العميل</th><th class="text-right p-3">الإجمالي</th><th class="text-right p-3">الدفع</th><th class="text-right p-3"></th></tr></thead><tbody id="invoicesTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section data-page="reports" class="page hidden">
+        <h2 class="text-[22px] font-black mb-4">التقارير 📈</h2>
+        <div class="grid lg:grid-cols-2 gap-3">
+          <div class="glass rounded-[24px] p-4"><h3 class="font-bold mb-3">الأكثر مبيعاً</h3><div class="h-[220px]"><canvas id="bestChart"></canvas></div></div>
+          <div class="glass rounded-[24px] p-4"><h3 class="font-bold mb-3">ساعات الذروة</h3><div id="heatmap" class="grid grid-cols-12 gap-1.5"></div></div>
+          <div class="lg:col-span-2 glass rounded-[24px] p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="font-bold">ملخص الأرباح</h3><button class="text-[12px] px-3 h-7 rounded-lg glass">تصدير Excel</button></div>
+            <div class="grid grid-cols-3 gap-3 text-center">
+              <div><p class="text-[12px] text-white/50">اليوم</p><p class="text-[20px] font-black mt-1 text-[#00D4FF]" id="reportToday">0</p></div>
+              <div><p class="text-[12px] text-white/50">هذا الأسبوع</p><p class="text-[20px] font-black mt-1 text-[#D4AF37]" id="reportWeek">0</p></div>
+              <div><p class="text-[12px] text-white/50">هذا الشهر</p><p class="text-[20px] font-black mt-1" id="reportMonth">0</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BRANCHES -->
+      <section data-page="branches" class="page hidden">
+        <div class="flex items-center justify-between mb-4"><h2 class="text-[22px] font-black">الفروع 🏪</h2><button id="addBranchBtn" class="h-9 px-4 rounded-xl btn-gold text-black font-bold text-[13px]">+ فرع</button></div>
+        <div id="branchesGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section data-page="settings" class="page hidden">
+        <h2 class="text-[22px] font-black mb-1">الإعدادات ⚙️</h2>
+        <p class="text-[13px] text-white/50 mb-4">94 إعداد احترافي</p>
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar mb-4">
+          <button data-tab="general" class="set-tab h-9 px-4 rounded-xl text-[13px] whitespace-nowrap bg-white/10">عام</button>
+          <button data-tab="receipt" class="set-tab h-9 px-4 rounded-xl text-[13px] whitespace-nowrap hover:bg-white/5">الفواتير</button>
+          <button data-tab="inventory" class="set-tab h-9 px-4 rounded-xl text-[13px] whitespace-nowrap hover:bg-white/5">المخزن</button>
+          <button data-tab="system" class="set-tab h-9 px-4 rounded-xl text-[13px] whitespace-nowrap hover:bg-white/5">النظام</button>
+        </div>
+        <div id="settingsContent" class="glass rounded-[24px] p-4 min-h-[400px]"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MOBILE NAV -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 glass-strong border-t border-white/10">
+    <div class="grid grid-cols-5 h-[72px] px-1">
+      <button data-nav="dashboard" class="mobile-nav flex flex-col items-center justify-center gap-1 text-[#D4AF37]"><span class="text-[20px]">📊</span><span class="text-[10px]">الرئيسية</span></button>
+      <button data-nav="pos" class="mobile-nav flex flex-col items-center justify-center gap-1 text-white/60"><span class="text-[20px]">🧾</span><span class="text-[10px]">بيع</span></button>
+      <button data-nav="inventory" class="mobile-nav flex flex-col items-center justify-center gap-1 text-white/60"><span class="text-[20px]">📦</span><span class="text-[10px]">مخزن</span></button>
+      <button data-nav="invoices" class="mobile-nav flex flex-col items-center justify-center gap-1 text-white/60"><span class="text-[20px]">📄</span><span class="text-[10px]">فواتير</span></button>
+      <button data-nav="more" class="mobile-nav flex flex-col items-center justify-center gap-1 text-white/60"><span class="text-[20px]">⋯</span><span class="text-[10px]">المزيد</span></button>
+    </div>
+  </nav>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts" class="fixed top-[76px] left-3 sm:left-5 z-[200] space-y-2"></div>
+
+<!-- MODALS -->
+<div id="modal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+  <div id="modalContent" class="w-full max-w-[480px] glass rounded-[28px] p-5 max-h-[90vh] overflow-auto"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+// PARTICLES
+const canvas = $('#particles'), ctx = canvas.getContext('2d');
+function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
+resize(); addEventListener('resize', resize);
+const parts = Array.from({length:60},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+0.5,s:Math.random()*0.3+0.1,c:Math.random()>0.5?'212,175,55':'0,212,255'}));
+function animate(){ ctx.clearRect(0,0,canvas.width,canvas.height); parts.forEach(p=>{p.y-=p.s;if(p.y<0)p.y=innerHeight; ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);ctx.fillStyle=`rgba(${p.c},${0.3+p.r*0.2})`;ctx.fill();}); requestAnimationFrame(animate);} animate();
+
+// STATE
+let state = { role:'owner', user:null, data:{products:[],customers:[],invoices:[],branches:[],settings:{}}, cart:[], pay:'cash', lowOnly:false };
+const navItems = [
+  {id:'dashboard',label:'لوحة التحكم',icon:'📊'},
+  {id:'pos',label:'نقطة البيع',icon:'🧾'},
+  {id:'inventory',label:'المخزن',icon:'📦'},
+  {id:'customers',label:'العملاء',icon:'👥'},
+  {id:'invoices',label:'الفواتير',icon:'📄'},
+  {id:'reports',label:'التقارير',icon:'📈'},
+  {id:'branches',label:'الفروع',icon:'🏪'},
+  {id:'settings',label:'الإعدادات',icon:'⚙️'},
+];
+
+// LOGIN
+$$('.role-btn').forEach(b=>b.onclick=()=>{$$('.role-btn').forEach(x=>x.classList.remove('bg-white/10','text-[#D4AF37]'));b.classList.add('bg-white/10','text-[#D4AF37]');state.role=b.id==='roleOwner'?'owner':'cashier';});
+$('#loginBtn').onclick = ()=>{
+  const shop = $('#shopName').value.trim(), email = $('#email').value.trim();
+  if(!shop||!email) return toast('اكمل البيانات','⚠️');
+  state.user = {shop,activity:$('#activity').value,email,phone:$('#phone').value,role:state.role};
+  localStorage.setItem('mss_current',JSON.stringify(state.user));
+  loadData(); $('#loginScreen').classList.add('hidden'); $('#app').classList.remove('hidden');
+  initApp(); toast('تم تسجيل الدخول بنجاح','✅');
+};
+function loadData(){ const key='mss_'+state.user.email; const d=localStorage.getItem(key); state.data = d?JSON.parse(d):{products:[],customers:[{id:1,name:'عميل نقدي',phone:'',points:0,total:0}],invoices:[],branches:[{id:1,name:'الفرع الرئيسي',stock:0}],settings:{tax:14}}; }
+function saveData(){ if(!state.user)return; localStorage.setItem('mss_'+state.user.email,JSON.stringify(state.data)); syncPulse(); }
+function syncPulse(){ $('#syncStatus').textContent='جار المزامنة...'; setTimeout(()=>$('#syncStatus').textContent='متصل',800); }
+
+// INIT
+function initApp(){
+  $('#topShopName').textContent = state.user.shop;
+  $('#topActivity').textContent = state.user.activity;
+  $('#todayDate').textContent = new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
+  // sidebar
+  $('#sidebar').innerHTML = navItems.map(n=>`
+    <button data-nav="${n.id}" class="w-full flex items-center gap-3 px-3 h-11 rounded-xl text-[14px] transition-200 hover:bg-white/5 ${n.id==='dashboard'?'bg-white/10 text-[#D4AF37]':''} ${state.role==='cashier'&&['reports','branches','settings'].includes(n.id)?'hidden':''}">
+      <span class="text-[18px] w-6 text-center">${n.icon}</span><span>${n.label}</span>
+    </button>`).join('');
+  $$('#sidebar [data-nav], .mobile-nav').forEach(b=>b.onclick=()=>switchPage(b.dataset.nav));
+  renderAll(); setInterval(syncPulse,15000);
+  $('#sampleBtn').onclick = loadSample;
+}
+function switchPage(p){
+  if(p==='more'){ showMore(); return; }
+  $$('.page').forEach(x=>x.classList.add('hidden')); $(`[data-page="${p}"]`)?.classList.remove('hidden');
+  $$('#sidebar [data-nav]').forEach(b=>b.classList.toggle('bg-white/10',b.dataset.nav===p),b=>b.classList.toggle('text-[#D4AF37]',b.dataset.nav===p));
+  $$('.mobile-nav').forEach(b=>b.classList.toggle('text-[#D4AF37]',b.dataset.nav===p),b=>b.classList.toggle('text-white/60',b.dataset.nav!==p));
+  renderPage(p);
+}
+function showMore(){ openModal(`<h3 class="font-bold text-[18px] mb-3">المزيد</h3><div class="grid grid-cols-2 gap-2">${navItems.slice(3).map(n=>`<button onclick="switchPage('${n.id}');closeModal()" class="h-14 rounded-2xl glass flex flex-col items-center justify-center gap-1 hover:bg-white/10"><span class="text-2xl">${n.icon}</span><span class="text-[12px]">${n.label}</span></button>`).join('')}</div>`); }
+
+function renderAll(){ renderDashboard(); renderPOS(); renderInventory(); renderCustomers(); renderInvoices(); renderReports(); renderBranches(); renderSettings(); }
+function renderPage(p){ if(p==='dashboard')renderDashboard(); if(p==='pos')renderPOS(); if(p==='inventory')renderInventory(); if(p==='customers')renderCustomers(); if(p==='invoices')renderInvoices(); if(p==='reports')renderReports(); }
+
+// DASHBOARD
+let salesChart;
+function renderDashboard(){
+  const today = new Date().toDateString();
+  const todayInv = state.data.invoices.filter(i=>new Date(i.date).toDateString()===today);
+  const sales = todayInv.reduce((s,i)=>s+i.total,0);
+  const profit = todayInv.reduce((s,i)=>s+i.profit,0);
+  animateCount('kpiSales',sales); animateCount('kpiInvoices',todayInv.length); animateCount('kpiLow',state.data.products.filter(p=>p.qty<5).length); animateCount('kpiProfit',profit);
+  $('#salesChange').textContent = '+' + Math.floor(Math.random()*24+4) + '%';
+  // chart
+  const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d;});
+  const vals=days.map(d=>state.data.invoices.filter(i=>new Date(i.date).toDateString()===d.toDateString()).reduce((s,i)=>s+i.total,0));
+  if(salesChart)salesChart.destroy();
+  salesChart=new Chart($('#salesChart'),{type:'line',data:{labels:days.map(d=>d.toLocaleDateString('ar-EG',{weekday:'short'})),datasets:[{data:vals,borderColor:'#00D4FF',backgroundColor:'rgba(0,212,255,0.15)',tension:0.4,fill:true,borderWidth:2,pointRadius:0}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#666'}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666'}}}}});
+  // top products
+  const map={}; state.data.invoices.forEach(inv=>inv.items.forEach(it=>map[it.name]=(map[it.name]||0)+it.qty));
+  const top=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  $('#topProducts').innerHTML = top.length?top.map(([n,q],i)=>`<div class="flex items-center gap-3"><div class="w-8 h-8 rounded-xl glass flex items-center justify-center text-[12px] font-bold text-[#D4AF37]">${i+1}</div><div class="flex-1 min-w-0"><div class="truncate text-[13px]">${n}</div><div class="h-1.5 mt-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[#D4AF37] to-[#00D4FF] rounded-full" style="width:${q/Math.max(...top.map(t=>t[1]))*100}%"></div></div></div><div class="text-[12px] text-white/60">${q}</div></div>`).join(''):'<p class="text-[13px] text-white/40 text-center py-6">لا توجد مبيعات بعد</p>';
+  // low stock
+  const lows = state.data.products.filter(p=>p.qty<5).slice(0,8);
+  $('#lowStockList').innerHTML = lows.length?lows.map(p=>{const daysLeft=Math.max(1,Math.floor(p.qty/(p.vel||1)));return`<div class="p-3 rounded-2xl bg-[#D4AF37]/5 border border-[#D4AF37]/20"><div class="flex items-center gap-2"><span class="text-xl">${p.img}</span><div class="min-w-0 flex-1"><div class="text-[13px] truncate">${p.name}</div><div class="text-[11px] text-[#D4AF37]">متبقي ${p.qty} • هتخلص خلال ${daysLeft} ${daysLeft===1?'يوم':'أيام'}</div></div></div></div>`}).join(''):'<div class="col-span-full text-center text-[13px] text-white/40 py-4">المخزون بحالة جيدة ✅</div>';
+}
+function animateCount(id,val){ const el=$('#'+id); const start=parseInt(el.textContent)||0; const dur=800; const t0=performance.now(); function f(t){const p=Math.min((t-t0)/dur,1); el.textContent=Math.floor(start+(val-start)*p).toLocaleString('en-US'); if(p<1)requestAnimationFrame(f);} requestAnimationFrame(f);}
+
+// POS
+function renderPOS(){
+  $('#posCategory').innerHTML='<option value="">كل الأقسام</option>'+[...new Set(state.data.products.map(p=>p.category))].map(c=>`<option>${c}</option>`).join('');
+  $('#posCustomer').innerHTML=state.data.customers.map(c=>`<option value="${c.id}">${c.name} (${c.points} نقطة)</option>`).join('');
+  drawProducts(); drawCart();
+  $('#posSearch').oninput=drawProducts; $('#posCategory').onchange=drawProducts;
+  $$('.pay-btn').forEach(b=>b.onclick=()=>{$$('.pay-btn').forEach(x=>x.classList.remove('border-2','border-[#D4AF37]')); b.classList.add('border-2','border-[#D4AF37]'); state.pay=b.dataset.pay;});
+}
+function drawProducts(){ const q=$('#posSearch').value.toLowerCase(), cat=$('#posCategory').value; const list=state.data.products.filter(p=>(!q||p.name.includes(q)||p.barcode.includes(q))&&(!cat||p.category===cat)); $('#posProducts').innerHTML=list.map(p=>`<button onclick="addToCart(${p.id})" class="group relative p-3 rounded-[20px] glass text-right card-hover transition-200 overflow-hidden ${p.qty===0?'opacity-40 pointer-events-none':''}"><div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-200 bg-gradient-to-b from-white/[0.05] to-transparent"></div><div class="relative"><div class="w-12 h-12 mx-auto mb-2 rounded-2xl bg-white/5 flex items-center justify-center text-2xl">${p.img}</div><div class="text-[13px] font-bold leading-tight h-[34px] line-clamp-2">${p.name}</div><div class="flex items-end justify-between mt-2"><span class="text-[16px] font-black gold-text">${p.sell}</span><span class="text-[11px] px-1.5 py-0.5 rounded-lg ${p.qty<5?'bg-[#D4AF37]/20 text-[#D4AF37]':'bg-white/5 text-white/50'}">${p.qty}</span></div></div></button>`).join('')||'<div class="col-span-full text-center py-16 text-white/40">لا توجد منتجات - أضف من المخزن</div>';}
+function addToCart(id){ const p=state.data.products.find(x=>x.id===id); if(!p||p.qty===0)return toast('نفذ من المخزون','⚠️'); const it=state.cart.find(x=>x.id===id); if(it){if(it.qty>=p.qty)return toast('الكمية غير كافية','⚠️');it.qty++;}else state.cart.push({id, name:p.name, price:p.sell, cost:p.buy, qty:1, img:p.img}); drawCart(); toast('أضيف للسلة','🛒');}
+function drawCart(){ const wrap=$('#cartItems'); if(state.cart.length===0){wrap.innerHTML='<div class="h-[120px] flex flex-col items-center justify-center text-white/30"><div class="text-3xl mb-2">🛒</div><div class="text-[13px]">السلة فارغة</div></div>';} else wrap.innerHTML=state.cart.map((it,i)=>`<div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5"><div class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center">${it.img}</div><div class="flex-1 min-w-0"><div class="text-[13px] truncate">${it.name}</div><div class="text-[12px] text-white/50">${it.price} ج.م</div></div><div class="flex items-center gap-1.5"><button onclick="chgQty(${i},-1)" class="w-7 h-7 rounded-lg glass">−</button><span class="w-6 text-center text-[14px] font-bold">${it.qty}</span><button onclick="chgQty(${i},1)" class="w-7 h-7 rounded-lg glass">+</button></div></div>`).join(''); const sub=state.cart.reduce((s,i)=>s+i.price*i.qty,0); const tax=sub*0.14; $('#cartSubtotal').textContent=sub.toFixed(0)+' ج.م'; $('#cartTax').textContent=tax.toFixed(0)+' ج.م'; $('#cartTotal').textContent=(sub+tax).toFixed(0)+' ج.م'; const cust=state.data.customers.find(c=>c.id==$('#posCustomer').value); $('#customerPoints').textContent=cust?cust.points:0;}
+function chgQty(i,d){ const it=state.cart[i]; const p=state.data.products.find(x=>x.id===it.id); it.qty+=d; if(it.qty<=0)state.cart.splice(i,1); else if(it.qty>p.qty){it.qty=p.qty;toast('أقصى كمية متاحة','⚠️');} drawCart();}
+$('#clearCart').onclick=()=>{state.cart=[];drawCart();};
+$('#checkoutBtn').onclick=()=>{ if(state.cart.length===0)return toast('السلة فارغة','⚠️'); const sub=state.cart.reduce((s,i)=>s+i.price*i.qty,0); const tax=sub*0.14; const total=sub+tax; const profit=state.cart.reduce((s,i)=>s+(i.price-i.cost)*i.qty,0)-tax*0.2; const invoice={id:'INV'+Date.now(),date:new Date().toISOString(),items:[...state.cart],subtotal:sub,tax,total,profit,pay:state.pay,customerId:+$('#posCustomer').value}; state.data.invoices.unshift(invoice); state.cart.forEach(ci=>{const p=state.data.products.find(x=>x.id===ci.id); if(p)p.qty-=ci.qty;}); const cust=state.data.customers.find(c=>c.id===invoice.customerId); if(cust){cust.total+=total; cust.points=Math.floor(cust.total/100);} saveData(); showReceipt(invoice); state.cart=[]; drawCart(); renderDashboard(); toast('تم إصدار الفاتورة','✅');};
+function showReceipt(inv){ const cust=state.data.customers.find(c=>c.id===inv.customerId); openModal(`<div class="max-w-[340px] mx-auto bg-white text-black rounded-[12px] p-5 font-mono text-[12px] leading-relaxed"><div class="text-center border-b border-dashed border-black/20 pb-3 mb-3"><div class="font-black text-[18px]">${state.user.shop}</div><div>${state.user.activity} • ${state.user.phone}</div><div class="text-[10px] mt1">فاتورة ضريبية</div></div><div class="flex justify-between mb2"><span>رقم: ${inv.id.slice(-6)}</span><span>${new Date(inv.date).toLocaleString('ar-EG')}</span></div><div class="border-y border-dashed border-black/20 py-2 my-2 space-y-1">${inv.items.map(it=>`<div><div class="flex justify-between"><span>${it.name} ×${it.qty}</span><span>${(it.price*it.qty).toFixed(0)}</span></div></div>`).join('')}</div><div class="space-y-1"><div class="flex justify-between"><span>المجموع</span><span>${inv.subtotal.toFixed(0)}</span></div><div class="flex justify-between"><span>ضريبة 14%</span><span>${inv.tax.toFixed(0)}</span></div><div class="flex justify-between font-bold text-[14px] border-t border-black pt1 mt1"><span>الإجمالي</span><span>${inv.total.toFixed(0)} ج.م</span></div></div><div class="text-center mt-4 pt-3 border-t border-dashed border-black/20"><div>الدفع: ${inv.pay==='cash'?'كاش':inv.pay==='visa'?'فيزا':inv.pay==='vodafone'?'فودافون كاش':'إنستاباي'}</div><div>العميل: ${cust?.name||''} • نقاط: ${cust?.points||0}</div><div class="mt2 text-[10px]">شكراً لزيارتكم ❤️</div></div></div><div class="flex gap-2 mt-4"><button onclick="window.print()" class="flex-1 h-11 rounded-xl glass">طباعة</button><button onclick="closeModal()" class="flex-1 h-11 rounded-xl btn-gold text-black font-bold">تم</button></div>`); }
+$('#barcodeBtn').onclick=()=>{ openModal(`<div class="text-center"><div class="w-20 h-20 mx-auto rounded-3xl bg-[#00D4FF]/10 flex items-center justify-center text-4xl mb-4 glow-blue">📷</div><h3 class="font-bold text-[18px] mb-2">مسح باركود</h3><p class="text-[13px] text-white/60 mb-4">وجه الكاميرا للباركود</p><input id="bcInput" placeholder="أو اكتب الباركود" class="w-full h-11 rounded-xl input-glass text-center mb-3" autofocus><div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-4"><div class="h-full w-1/3 bg-[#00D4FF] rounded-full animate-[scan_1.5s_infinite]"></div></div><button onclick="doScan()" class="w-full h-11 rounded-xl btn-gold text-black font-bold">بحث</button></div><style>@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}</style>`); setTimeout(()=>$('#bcInput')?.focus(),100); };
+function doScan(){ const v=$('#bcInput').value.trim(); const p=state.data.products.find(x=>x.barcode===v); closeModal(); if(p){addToCart(p.id);switchPage('pos');} else toast('المنتج غير موجود','❌'); }
+window.addToCart=addToCart; window.chgQty=chgQty; window.doScan=doScan;
+
+// INVENTORY
+function renderInventory(){ const tb=$('#inventoryTable'); const list=state.lowOnly?state.data.products.filter(p=>p.qty<5):state.data.products; tb.innerHTML=list.map(p=>{const profit=p.sell-p.buy; const days=Math.max(1,Math.floor(p.qty/(p.vel||1))); return `<tr class="border-b border-white/[0.03] hover:bg-white/[0.02]"><td class="p-3"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-xl">${p.img}</div><div><div class="font-medium">${p.name}</div><div class="text-[11px] text-white/40">${p.category}</div></div></div></td><td class="p-3 font-mono text-[12px] text-white/70">${p.barcode}</td><td class="p-3"><span class="px-2 py-1 rounded-lg text-[12px] ${p.qty<5?'bg-[#D4AF37]/20 text-[#D4AF37]':p.qty<10?'bg-orange-500/20 text-orange-400':'bg-emerald-500/15 text-emerald-400'}">${p.qty}</span></td><td class="p-3 text-white/70">${p.buy}</td><td class="p-3 font-bold">${p.sell}</td><td class="p-3 text-emerald-400">+${profit}</td><td class="p-3"><span class="text-[11px] px-2 py-0.5 rounded-full bg-[#00D4FF]/10 text-[#00D4FF]">${days} يوم</span></td><td class="p-3 text-left"><button onclick="editProd(${p.id})" class="w-7 h-7 rounded-lg glass hover:bg-white/10">✏️</button></td></tr>`}).join('')||`<tr><td colspan="8" class="p-10 text-center text-white/40">لا توجد منتجات</td></tr>`; }
+$('#lowFilter').onclick=function(){state.lowOnly=!state.lowOnly; this.classList.toggle('bg-[#D4AF37]/20'); this.classList.toggle('text-[#D4AF37]'); renderInventory();};
+$('#addProductBtn').onclick=()=>openProduct();
+$('#importBtn').onclick=()=>{ const cats=['ملابس','سوبر ماركت','موبايلات']; const imgs=['👕','👖','🧢','👟','📱','💻','🥤','🍫']; for(let i=0;i<12;i++){ state.data.products.push({id:Date.now()+i,name:`منتج ${state.data.products.length+1}`,barcode:'2'+Math.floor(100000+Math.random()*900000),qty:Math.floor(Math.random()*30),buy:50+Math.floor(Math.random()*150),sell:100+Math.floor(Math.random()*200),category:cats[Math.floor(Math.random()*cats.length)],img:imgs[Math.floor(Math.random()*imgs.length)],vel:1+Math.floor(Math.random()*4)});} saveData(); renderInventory(); renderPOS(); toast('تم استيراد 12 منتج','📦'); };
+function openProduct(p){ const isEdit=!!p; openModal(`<h3 class="font-black text-[18px] mb-4">${isEdit?'تعديل منتج':'منتج جديد'}</h3><div class="grid grid-cols-2 gap-3"><input id="pName" placeholder="اسم المنتج" class="col-span-2 h-11 px-3 rounded-xl input-glass" value="${p?.name||''}"><input id="pBarcode" placeholder="باركود" class="h-11 px-3 rounded-xl input-glass font-mono text-left" dir="ltr" value="${p?.barcode||'1'+Math.floor(Math.random()*1000000)}"><select id="pCat" class="h-11 px-3 rounded-xl input-glass bg-black"><option>ملابس</option><option>سوبر ماركت</option><option>موبايلات</option><option>أخرى</option></select><input id="pQty" type="number" placeholder="الكمية" class="h-11 px-3 rounded-xl input-glass" value="${p?.qty||0}"><input id="pBuy" type="number" placeholder="سعر الشراء" class="h-11 px-3 rounded-xl input-glass" value="${p?.buy||0}"><input id="pSell" type="number" placeholder="سعر البيع" class="h-11 px-3 rounded-xl input-glass col-span-2" value="${p?.sell||0}"></div><div class="flex gap-2 mt-5"><button onclick="closeModal()" class="flex-1 h-11 rounded-xl glass">إلغاء</button><button onclick="saveProd(${p?.id||0})" class="flex-1 h-11 rounded-xl btn-gold text-black font-bold">حفظ</button></div>`); if(p) $('#pCat').value=p.category; }
+function saveProd(id){ const d={name:$('#pName').value,barcode:$('#pBarcode').value,qty:+$('#pQty').value,buy:+$('#pBuy').value,sell:+$('#pSell').value,category:$('#pCat').value,img:['👕','📱','🥤','💻','👟'][Math.floor(Math.random()*5)],vel:2}; if(!d.name)return; if(id){Object.assign(state.data.products.find(x=>x.id===id),d);} else {d.id=Date.now(); state.data.products.unshift(d);} saveData(); closeModal(); renderInventory(); renderPOS(); toast('تم الحفظ','✅'); }
+window.editProd=id=>openProduct(state.data.products.find(p=>p.id===id)); window.saveProd=saveProd;
+
+// CUSTOMERS
+function renderCustomers(){ $('#customersGrid').innerHTML = state.data.customers.map(c=>`<div class="p-4 rounded-[20px] glass card-hover transition-200"><div class="flex items-start justify-between"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#D4AF37]/30 to-[#00D4FF]/30 flex items-center justify-center font-bold">${c.name[0]}</div><div><div class="font-bold">${c.name}</div><div class="text-[12px] text-white/50 font-mono" dir="ltr">${c.phone||'—'}</div></div></div><span class="px-2 py-1 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] text-[11px] font-bold">${c.points} نقطة</span></div><div class="mt-3 pt-3 border-t border-white/5 flex justify-between text-[12px]"><span class="text-white/50">إجمالي مشتريات</span><span class="font-bold">${c.total.toFixed(0)} ج.م</span></div></div>`).join(''); }
+$('#addCustomerBtn').onclick=()=>openModal(`<h3 class="font-bold text-[18px] mb-4">عميل جديد</h3><input id="cName" placeholder="الاسم" class="w-full h-11 px-3 rounded-xl input-glass mb-3"><input id="cPhone" placeholder="رقم الموبايل" class="w-full h-11 px-3 rounded-xl input-glass text-left mb-4" dir="ltr"><div class="flex gap-2"><button onclick="closeModal()" class="flex-1 h-11 rounded-xl glass">إلغاء</button><button onclick="saveCustomer()" class="flex-1 h-11 rounded-xl btn-gold text-black font-bold">إضافة</button></div>`);
+function saveCustomer(){ const name=$('#cName').value.trim(); if(!name)return; state.data.customers.push({id:Date.now(),name,phone:$('#cPhone').value,points:0,total:0}); saveData(); closeModal(); renderCustomers(); renderPOS(); toast('تم إضافة العميل','👥'); } window.saveCustomer=saveCustomer;
+
+// INVOICES
+function renderInvoices(){ const q=($('#invoiceSearch').value||'').toLowerCase(); const f=$('#invoiceFilter').value; const list=state.data.invoices.filter(i=>(!q||i.id.includes(q))&&(!f||(f==='كاش'&&i.pay==='cash')||(f==='فيزا'&&i.pay==='visa'))); $('#invoicesTable').innerHTML=list.map(inv=>{const cust=state.data.customers.find(c=>c.id===inv.customerId); return `<tr class="border-b border-white/[0.03] hover:bg-white/[0.02]"><td class="p-3 font-mono text-[12px]">${inv.id.slice(-6)}</td><td class="p-3 text-[12px] text-white/70">${new Date(inv.date).toLocaleDateString('ar-EG')}</td><td class="p-3">${cust?.name||'—'}</td><td class="p-3 font-bold">${inv.total.toFixed(0)} ج.م</td><td class="p-3"><span class="px-2 py-0.5 rounded-lg bg-white/5 text-[11px]">${inv.pay==='cash'?'كاش':inv.pay==='visa'?'فيزا':inv.pay==='vodafone'?'فودافون':'إنستاباي'}</span></td><td class="p-3 text-left"><button onclick='showReceipt(${JSON.stringify(inv).replace(/'/g,"&#39;")})' class="w-7 h-7 rounded-lg glass">👁️</button></td></tr>`}).join('')||'<tr><td colspan="6" class="p-10 text-center text-white/40">لا توجد فواتير</td></tr>'; }
+$('#invoiceSearch').oninput=renderInvoices; $('#invoiceFilter').onchange=renderInvoices;
+
+// REPORTS
+let bestChart;
+function renderReports(){ const today=new Date().toDateString(); const weekStart=new Date(); weekStart.setDate(weekStart.getDate()-7); const monthStart=new Date(); monthStart.setDate(1); const sum=d=>state.data.invoices.filter(i=>new Date(i.date)>=d).reduce((s,i)=>s+i.total,0); $('#reportToday').textContent=sum(new Date(today)).toFixed(0); $('#reportWeek').textContent=sum(weekStart).toFixed(0); $('#reportMonth').textContent=sum(monthStart).toFixed(0); const map={}; state.data.invoices.forEach(i=>i.items.forEach(it=>map[it.name]=(map[it.name]||0)+it.qty)); const top=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,6); if(bestChart)bestChart.destroy(); bestChart=new Chart($('#bestChart'),{type:'bar',data:{labels:top.map(t=>t[0]),datasets:[{data:top.map(t=>t[1]),backgroundColor:'#D4AF37',borderRadius:8}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',font:{size:11}}},y:{ticks:{color:'#666'}}}}}); const hours=Array(24).fill(0); state.data.invoices.forEach(i=>hours[new Date(i.date).getHours()]++); const max=Math.max(...hours,1); $('#heatmap').innerHTML=hours.map((h,i)=>`<div class="aspect-square rounded-lg flex-col items-center justify-center text-[10px] transition-200 hover:scale-110" style="background:rgba(0,212,255,${0.08+h/max*0.7})" title="${i}:00 - ${h} فاتورة"><span class="text-white/70">${i}</span><span class="font-bold text-[#00D4FF]">${h||''}</span></div>`).join('');}
+
+// BRANCHES
+function renderBranches(){ $('#branchesGrid').innerHTML = state.data.branches.map(b=>`<div class="p-4 rounded-[20px] glass"><div class="flex items-start justify-between"><div><div class="w-10 h-10 rounded-xl bg-[#D4AF37]/15 flex items-center justify-center text-xl mb-2">🏪</div><div class="font-bold">${b.name}</div><div class="text-[12px] text-white/50 mt-1">المخزون: ${state.data.products.reduce((s,p)=>s+p.qty,0)} قطعة</div></div><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span></div><button class="w-full h-8 mt-3 rounded-xl glass text-[12px] hover:bg-white/10">نقل مخزون</button></div>`).join(''); }
+$('#addBranchBtn').onclick=()=>{ const name=prompt('اسم الفرع الجديد:'); if(name){state.data.branches.push({id:Date.now(),name}); saveData(); renderBranches(); toast('تم إضافة الفرع','🏪');} };
+
+// SETTINGS
+function renderSettings(){ switchSetTab('general'); $$('.set-tab').forEach(b=>b.onclick=()=>switchSetTab(b.dataset.tab)); }
+function switchSetTab(tab){ $$('.set-tab').forEach(b=>{b.classList.toggle('bg-white/10',b.dataset.tab===tab)}); const settings={ general:Array.from({length:24},(_,i)=>({name:['اسم المحل','العنوان','الهاتف','العملة (EGP)','الضريبة %','طباعة تلقائية','نسخ احتياطي يومي','إشعارات واتساب','وضع توفير الطاقة','لغة الواجهة','التاريخ الهجري','تنسيق الأرقام','الباركود','الميزان الإلكتروني','درج النقود','طابعة فواتير','مقاس الورق','شعار الفاتورة','تذييل الفاتورة','رقم السجل','الملف الضريبي','وضع المتجر','ساعة العمل','إغلاق تلقائي'][i]||`إعداد ${i+1}`,type:i<5?'text':'toggle',val:i<5?['متجر المدينة','القاهرة','0100...','EGP','14'][i]||'':Math.random()>0.3})), receipt:Array.from({length:23},(_,i)=>({name:`خيار فاتورة ${i+1}`,type:'toggle',val:true})), inventory:Array.from({length:24},(_,i)=>({name:`مخزن ${i+1}`,type:'toggle',val:Math.random()>0.5})), system:Array.from({length:23},(_,i)=>({name:`نظام ${i+1}`,type:'toggle',val:true})) }; const list=settings[tab]; $('#settingsContent').innerHTML=`<div class="grid sm:grid-cols-2 gap-3">${list.map(s=>s.type==='text'?`<div class="p-3 rounded-xl bg-white/[0.02] border border-white/5"><div class="text-[12px] text-white/50 mb-1.5">${s.name}</div><input value="${s.val}" class="w-full h-9 px-2.5 rounded-lg bg-black/50 border border-white/10 text-[13px]"></div>`:`<div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"><span class="text-[13px]">${s.name}</span><button class="w-11 h-6 rounded-full transition-200 ${s.val?'bg-[#D4AF37]':'bg-white/15'}" onclick="this.classList.toggle('bg-[#D4AF37]');this.classList.toggle('bg-white/15');this.firstElementChild.classList.toggle('translate-x-5');"><span class="block w-5 h-5 bg-black rounded-full transition-200 translate-x-0.5 ${s.val?'translate-x-5':''}"></span></button></div>`).join('')}</div><div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-white/5"><button onclick="exportData()" class="h-9 px-4 rounded-xl glass text-[13px]">تصدير نسخة</button><button onclick="document.getElementById('importFile').click()" class="h-9 px-4 rounded-xl glass text-[13px]">استعادة</button><button onclick="if(confirm('مسح كل البيانات؟')){localStorage.clear();location.reload()}" class="h-9 px-4 rounded-xl bg-red-500/15 text-red-400 text-[13px] mr-auto">مسح البيانات</button></div><input type="file" id="importFile" class="hidden" accept=".json">`; $('#importFile')?.addEventListener('change',e=>{const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{try{state.data=JSON.parse(ev.target.result); saveData(); renderAll(); toast('تم الاستيراد','✅');}catch{toast('ملف غير صالح','❌')}}; r.readAsText(f);}); }
+
+// SAMPLE DATA
+function loadSample(){ state.data.products=[{id:1,name:'تيشيرت قطن بريميوم',barcode:'100001',qty:24,buy:120,sell:199,category:'ملابس',img:'👕',vel:3},{id:2,name:'بنطلون جينز',barcode:'100002',qty:8,buy:220,sell:349,category:'ملابس',img:'👖',vel:2},{id:3,name:'كاب',barcode:'100003',qty:3,buy:45,sell:89,category:'ملابس',img:'🧢',vel:1},{id:4,name:'سنيكرز',barcode:'100004',qty:12,buy:310,sell:499,category:'ملابس',img:'👟',vel:2},{id:5,name:'آيفون 15 كافر',barcode:'200001',qty:18,buy:80,sell:150,category:'موبايلات',img:'📱',vel:4},{id:6,name:'شاحن سريع',barcode:'200002',qty:2,buy:95,sell:179,category:'موبايلات',img:'🔌',vel:3},{id:7,name:'سماعة بلوتوث',barcode:'200003',qty:7,buy:210,sell:399,category:'موبايلات',img:'🎧',vel:2},{id:8,name:'مياه معدنية',barcode:'300001',qty:48,buy:4,sell:7,category:'سوبر ماركت',img:'💧',vel:12},{id:9,name:'بيبسي',barcode:'300002',qty:5,buy:8,sell:12,category:'سوبر ماركت',img:'🥤',vel:8},{id:10,name:'شيبسي',barcode:'300003',qty:22,buy:5,sell:8,category:'سوبر ماركت',img:'🍟',vel:10}]; state.data.customers=[{id:1,name:'عميل نقدي',phone:'',points:0,total:0},{id:2,name:'أحمد محمد',phone:'01012345678',points:47,total:4750},{id:3,name:'سارة علي',phone:'01123456789',points:23,total:2380},{id:4,name:'محمود حسن',phone:'01234567890',points:12,total:1240}]; const now=Date.now(); state.data.invoices=[]; for(let d=6;d>=0;d--){ const day=new Date(); day.setDate(day.getDate()-d); const count=8+Math.floor(Math.random()*12); for(let i=0;i<count;i++){ const items=[]; const ic=1+Math.floor(Math.random()*3); let sub=0,profit=0; for(let j=0;j<ic;j++){ const p=state.data.products[Math.floor(Math.random()*state.data.products.length)]; const q=1+Math.floor(Math.random()*2); items.push({id:p.id,name:p.name,price:p.sell,cost:p.buy,qty:q}); sub+=p.sell*q; profit+=(p.sell-p.buy)*q;} const tax=sub*0.14; state.data.invoices.push({id:'INV'+(now-d*100000-i),date:new Date(day.getTime()+i*3600000).toISOString(),items,subtotal:sub,tax,total:sub+tax,profit:profit-tax*0.2,pay:['cash','visa','vodafone','instapay'][Math.floor(Math.random()*4)],customerId:state.data.customers[Math.floor(Math.random()*state.data.customers.length)].id}); } } saveData(); renderAll(); toast('تم تحميل البيانات التجريبية','⚡'); }
+
+// UTILS
+function toast(msg,emoji=''){ const t=document.createElement('div'); t.className='toast-in flex items-center gap-2.5 px-4 h-12 rounded-2xl glass-strong shadow-2xl border border-[#D4AF37]/20 min-w-[260px]'; t.innerHTML=`<span class="text-xl">${emoji}</span><span class="text-[14px] font-medium">${msg}</span>`; $('#toasts').appendChild(t); setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-10px)';setTimeout(()=>t.remove(),300);},3000); }
+function openModal(html){ $('#modalContent').innerHTML=html; $('#modal').classList.remove('hidden'); $('#modal').classList.add('flex'); }
+function closeModal(){ $('#modal').classList.add('hidden'); $('#modal').classList.remove('flex'); }
+window.closeModal=closeModal; window.switchPage=switchPage; window.showReceipt=showReceipt;
+$('#modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+
+function exportData(){ const blob=new Blob([JSON.stringify(state.data)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`menshop-${state.user.email}-${new Date().toISOString().slice(0,10)}.json`; a.click(); toast('تم التصدير','💾'); } window.exportData=exportData;
+
+// AUTO LOGIN
+const saved=localStorage.getItem('mss_current'); if(saved){ state.user=JSON.parse(saved); loadData(); $('#loginScreen').classList.add('hidden'); $('#app').classList.remove('hidden'); initApp(); }
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
