@@ -1,0 +1,6 @@
+{
+  "appId": "com.lanamarket.app",
+  "appName": "لانا ماركت",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
